@@ -13,6 +13,40 @@ To use the LogDNA Orb, reference it in your project and then use one of the incl
 
 Documentation for each method is available inline in [orb.yml](https://github.com/logdna/logdna-orb/blob/master/src/logdna/orb.yml).
 
+Here's a very simple example of a CircleCI Config using LogDNA Orb:
+
+```yaml
+version: 2.1
+orbs:
+    logdna: logdna/logdna@0.0.1
+jobs:
+  build:
+    machine: true
+    environment:
+      LOGDNA_KEY: {{ Your LogDNA Ingestion Key Here }}
+    steps:
+      - checkout
+      # Notify LogDNA @ the Start of the Job via cURL:
+      - logdna/notify
+      # Enable Kubernetes Logging via LogDNA Agent
+      - logdna/enablek8slogging
+     
+     # The Rest of Your Build Steps...
+
+     # Report to LogDNA @ the End of the Job via cURL:
+      - run:
+      	name: Report Success
+      	when: on_success
+      	command: logdna/report
+      - run:
+      	name: Report Failure
+      	when: on_fail
+      	command: |
+      		logdna/report:
+      			failure: true
+```
+
+
 ## Help / Support
 
 If you run into any issues, please email us at [support@logdna.com](mailto:support@logdna.com)
