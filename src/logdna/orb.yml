@@ -1,0 +1,192 @@
+version: 2.1
+
+description: Send CircleCI Events to LogDNA upon Build
+
+commands:
+  notify:
+    description: Notify LogDNA of the Build Event via cURL
+    parameters:
+      logdna-key:
+        description: The LogDNA Ingestion Key
+        type: string
+        default: ${LOGDNA_KEY}
+      hostname:
+        description: Custom Hostname
+        type: string
+        default: ${CIRCLE_PROJECT_REPONAME}
+      app:
+        description: Custom App Name
+        type: string
+        default: ${CIRCLE_JOB}
+      tags:
+        description: Comma-Separated List of Tags
+        type: string
+        default: circleci
+      baseurl:
+        description: Custom LogDNA Ingestion URL
+        type: string
+        default: https://logs.logdna.com/logs/ingest
+    steps:
+      - run:
+          name: Prepare Log Line
+          command: |
+            LINE="#${CIRCLE_BUILD_NUM}: ${CIRCLE_JOB} on"
+            if [ -z "${CIRCLE_PULL_REQUEST" ]; then
+              LINE="${LINE} Pull Request"
+              if [ ! -z "${CIRCLE_PR_NUMBER}" ]; then
+                LINE="${LINE}(#${CIRCLE_PR_NUMBER})"
+              fi
+              if [ ! -z "${CIRCLE_PR_REPONAME}" ]; then
+                LINE="${LINE} from ${CIRCLE_PR_USERNAME}/${CIRCLE_PR_REPONAME}"
+              fi
+              LINE="${LINE} onto ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
+            else
+              LINE="${LINE} Branch ${CIRCLE_BRANCH} of ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
+            fi
+            LINE="${LINE} has been triggered"
+            if [ ! -z "${CIRCLE_USERNAME}" ]; then
+              LINE="${LINE} by @${CIRCLE_USERNAME}"
+            fi
+            echo 'export LOG_LINE="$(echo ${LINE})"' >> ${BASH_ENV}
+      - run:
+          name: Ship the Information
+          command: |
+            if [ ! -z "<< parameters.logdna-key >>" ]; then
+               curl "<< parameters.baseurl >>?hostname=<< parameters.hostname >>&now=$(date +%s)" \
+               -u << parameters.logdna-key >>: \
+               -H "Content-Type: application/json; charset=UTF-8" \
+               -d \
+               '{ 
+                 "lines": [ 
+                   { 
+                     "line":"${LOG_LINE}", 
+                     "app":"<< parameters.app >>",
+                     "tags":"<< parameters.tags >>",
+                     "level": "INFO",
+                     "meta": {
+                       "pr": {
+                         "associated": "${CIRCLE_PULL_REQUEST}",
+                         "number": ${CIRCLE_PR_NUMBER},
+                         "reponame": "${CIRCLE_PR_REPONAME}",
+                         "username": "${CIRCLE_PR_USERNAME}"
+                       },
+                       "project": {
+                         "branch": "${CIRCLE_BRANCH}",
+                         "reponame": "${CIRCLE_PROJECT_REPONAME}",
+                         "username": "${CIRCLE_PROJECT_USERNAME}"
+                       },
+                       "build": {
+                         "number": ${CIRCLE_BUILD_NUM},
+                         "url": "${CIRCLE_BUILD_URL}",
+                         "previous": ${CIRCLE_PREVIOUS_BUILD_NUM}
+                         "compare": "${CIRCLE_COMPARE_URL}"
+                       }
+                     }
+                   }
+                 ] 
+              }'
+            fi
+  report:
+    description: Report the Status of the Build via cURL
+    parameters:
+      logdna-key:
+        description: The LogDNA Ingestion Key
+        type: string
+        default: ${LOGDNA_KEY}
+      failure:
+        description: Whether the Build has Failed
+        type: boolean
+        default: false
+      hostname:
+        description: Custom Hostname
+        type: string
+        default: ${CIRCLE_PROJECT_REPONAME}
+      app:
+        description: Custom App Name
+        type: string
+        default: ${CIRCLE_JOB}
+      tags:
+        description: Comma-Separated List of Tags
+        type: string
+        default: circleci
+      baseurl:
+        description: Custom LogDNA Ingestion URL
+        type: string
+        default: https://logs.logdna.com/logs/ingest
+    steps:
+      - run:
+          name: Prepare Log Line
+          command: |
+            LINE="#${CIRCLE_BUILD_NUM}: ${CIRCLE_JOB} on"
+            LEVEL="INFO"
+            if [ -z "${CIRCLE_PULL_REQUEST" ]; then
+              LINE="${LINE} Pull Request"
+              if [ ! -z "${CIRCLE_PR_NUMBER}" ]; then
+                LINE="${LINE}(#${CIRCLE_PR_NUMBER})"
+              fi
+              if [ ! -z "${CIRCLE_PR_REPONAME}" ]; then
+                LINE="${LINE} from ${CIRCLE_PR_USERNAME}/${CIRCLE_PR_REPONAME}"
+              fi
+              LINE="${LINE} onto ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
+            else
+              LINE="${LINE} Branch ${CIRCLE_BRANCH} of ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
+            fi
+            if [ "<< parameters.failure >>" = true ]; then
+              LINE="${LINE} has failed!"
+              LEVEL="ERROR"
+            else
+              LINE="${LINE} has succeeded!"
+            fi
+            echo 'export LOG_LINE="$(echo ${LINE})"' >> ${BASH_ENV}
+            echo 'export LOG_LEVEL="$(echo ${LEVEL})"' >> ${BASH_ENV}
+      - run:
+          name: Ship the Information
+          command: |
+            if [ ! -z "<< parameters.logdna-key >>" ]; then
+               curl "<< parameters.baseurl >>?hostname=<< parameters.hostname >>&now=$(date +%s)" \
+               -u << parameters.logdna-key >>: \
+               -H "Content-Type: application/json; charset=UTF-8" \
+               -d \
+               '{ 
+                 "lines": [ 
+                   { 
+                     "line":"${LOG_LINE}", 
+                     "app":"<< parameters.app >>",
+                     "tags":"<< parameters.tags >>",
+                     "level": ${LOG_LEVEL},
+                     "meta": {
+                       "pr": {
+                         "associated": "${CIRCLE_PULL_REQUEST}",
+                         "number": ${CIRCLE_PR_NUMBER},
+                         "reponame": "${CIRCLE_PR_REPONAME}",
+                         "username": "${CIRCLE_PR_USERNAME}"
+                       },
+                       "project": {
+                         "branch": "${CIRCLE_BRANCH}",
+                         "reponame": "${CIRCLE_PROJECT_REPONAME}",
+                         "username": "${CIRCLE_PROJECT_USERNAME}"
+                       },
+                       "build": {
+                         "number": ${CIRCLE_BUILD_NUM},
+                         "url": "${CIRCLE_BUILD_URL}",
+                         "previous": ${CIRCLE_PREVIOUS_BUILD_NUM}
+                         "compare": "${CIRCLE_COMPARE_URL}"
+                       }
+                     }
+                   }
+                 ] 
+              }'
+            fi
+  enablek8slogging:
+    description: Enable Kubernetes Logging via LogDNA Agent
+    parameters:
+      logdna-key:
+        description: The LogDNA Ingestion Key
+        type: string
+        default: ${LOGDNA_KEY}
+    steps:
+      - run:
+          name: Enable LogDNA Agent for K8S
+          command: |
+            kubectl create secret generic logdna-agent-key --from-literal=logdna-agent-key=<< parameters.logdna-key >>
+            kubectl create -f https://raw.githubusercontent.com/logdna/logdna-agent/master/logdna-agent-ds.yaml

@@ -6,12 +6,18 @@ If you don't have them already, create accounts in [LogDNA](https://logdna.com/s
 
 ## Usage
 
+To use the LogDNA Orb, reference it in your project and then use one of the included commands:
+* `notify`: Notify LogDNA of the Build Event via cURL
+* `report`: Report the Status of the Build via cURL
+* `enablek8slogging`: Enable Kubernetes Logging via LogDNA Agent
+
+Documentation for each method is available inline in [orb.yml](https://github.com/logdna/logdna-orb/blob/master/src/logdna/orb.yml).
+
 ## Help / Support
 
 If you run into any issues, please email us at [support@logdna.com](mailto:support@logdna.com)
 
 For bug reports, please [open an issue on GitHub](https://github.com/logdna/logdna-orb/issues/new).
-
 
 ## Contributing
 
