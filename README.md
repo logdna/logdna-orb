@@ -17,7 +17,7 @@ For bug reports, please [open an issue on GitHub](https://github.com/logdna/logd
 
 For details on how to do development work on a CircleCI orb, check out [Circle CI's Orb docs](https://circleci.com/docs/2.0/creating-orbs/).
 
-To contribute to the Rollbar orb:
+To contribute to the LogDNA orb:
 
 1. [Fork it](https://github.com/logdna/logdna-orb)
 2. Create your feature branch (```git checkout -b my-new-feature```).
