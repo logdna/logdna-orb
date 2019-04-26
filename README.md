@@ -2,13 +2,14 @@
 [CircleCI Orb](https://github.com/CircleCI-Public/config-preview-sdk/tree/master/docs) for Reporting Deploys to LogDNA.
 
 ## Requirements
-If you don't have them already, create accounts in [LogDNA](https://logdna.com/sign-up/) and [CircleCI](https://circleci.com/signup/).
+* A LogDNA account. You can create a LogDNA account[here](https://logdna.com/sign-up/)
+* A CircleCI account. You can create a CircleCI account [here](https://circleci.com/signup/).
 
 ## Usage
 
 To use the LogDNA Orb, reference it in your project and then use one of the included commands:
-* `notify`: Notify LogDNA of the Build Event via cURL
-* `report`: Report the Status of the Build via cURL
+* `notify`: Notify LogDNA of the Build Event
+* `report`: Report the Status of the Build
 * `enablek8slogging`: Enable Kubernetes Logging via LogDNA Agent
 	* **Requirement**: `kubectl` must be installed before the execution of the command
 
