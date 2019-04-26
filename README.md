@@ -2,8 +2,8 @@
 [CircleCI Orb](https://github.com/CircleCI-Public/config-preview-sdk/tree/master/docs) for Reporting Deploys to LogDNA.
 
 ## Requirements
-* A LogDNA account. You can create a LogDNA account [here](https://logdna.com/sign-up/)
-* A CircleCI account. You can create a CircleCI account [here](https://circleci.com/signup/).
+* A LogDNA account. Create a LogDNA account [here](https://logdna.com/sign-up/)
+* A CircleCI account. Create a CircleCI account [here](https://circleci.com/signup/).
 
 ## Usage
 
