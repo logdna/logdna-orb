@@ -35,17 +35,16 @@ jobs:
 
      # Report to LogDNA @ the End of the Job via cURL:
       - run:
-      	name: Report Success
-      	when: on_success
-      	command: logdna/report
+          name: Export Failure
+          command: echo 'export FAILURE=true' >> ${BASH_ENV}
+          when: on_fail
       - run:
-      	name: Report Failure
-      	when: on_fail
-      	command: |
-      		logdna/report:
-      			failure: true
+          name: Export Failure
+          command: echo 'export FAILURE=false' >> ${BASH_ENV}
+          when: on_success
+      - logdna/report:
+          failure: ${FAILURE}
 ```
-
 
 ## Help / Support
 
