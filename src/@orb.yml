@@ -1,0 +1,3 @@
+version: 2.1
+
+description: Send CircleCI Events to LogDNA upon Build
