@@ -1,0 +1,16 @@
+version: 2.1
+orbs:
+  orb-tools: circleci/orb-tools@9.0.0
+workflows:
+  lint-pack-validate-publish-dev:
+    jobs:
+      - orb-tools/lint
+      - orb-tools/pack:
+          requires:
+            - orb-tools/lint
+      # - orb-tools/publish-dev:
+      #     context: logdna-default
+      #     orb-name: logdna/logdna-orb
+      #     alpha-version-ref: dev:${CIRCLE_BRANCH}
+      #     requires:
+      #       - orb-tools/pack

@@ -56,10 +56,10 @@ commands:
                -u << parameters.logdna-key >>: \
                -H "Content-Type: application/json; charset=UTF-8" \
                -d \
-               '{ 
-                 "lines": [ 
-                   { 
-                     "line":"${LOG_LINE}", 
+               '{
+                 "lines": [
+                   {
+                     "line":"${LOG_LINE}",
                      "app":"<< parameters.app >>",
                      "tags":"<< parameters.tags >>",
                      "level": "INFO",
@@ -83,7 +83,7 @@ commands:
                        }
                      }
                    }
-                 ] 
+                 ]
               }'
             fi
   report:
@@ -147,10 +147,10 @@ commands:
                -u << parameters.logdna-key >>: \
                -H "Content-Type: application/json; charset=UTF-8" \
                -d \
-               '{ 
-                 "lines": [ 
-                   { 
-                     "line":"${LOG_LINE}", 
+               '{
+                 "lines": [
+                   {
+                     "line":"${LOG_LINE}",
                      "app":"<< parameters.app >>",
                      "tags":"<< parameters.tags >>",
                      "level": ${LOG_LEVEL},
@@ -174,7 +174,7 @@ commands:
                        }
                      }
                    }
-                 ] 
+                 ]
               }'
             fi
   enablek8slogging:
