@@ -1,16 +1,55 @@
 version: 2.1
 orbs:
-  orb-tools: circleci/orb-tools@9.0.0
+  orb-tools: circleci/orb-tools@9.1.0
+everything_filters: &everything_filter
+  branches:
+    only: /.*/
+  tags:
+    only: /[0-9]+\.[0-9]+\.[0-9]+/
+deployment_filters: &deployment_filter
+  branches:
+    only: master
+  tags:
+    only: /[0-9]+\.[0-9]+\.[0-9]+/
+test_build_filters: &test_build_filter
+  branches:
+    ignore: master
+  tags:
+    ignore: /.*/
+tags_only_filters: &tags_only_filter
+  branches:
+    ignore: /.*/
+  tags:
+    only: /[0-9]+\.[0-9]+\.[0-9]+/
 workflows:
-  lint-pack-validate-publish-dev:
+  dev:
     jobs:
       - orb-tools/lint
+
       - orb-tools/pack:
           requires:
             - orb-tools/lint
+
       - orb-tools/publish-dev:
           context: logdna-default
           orb-name: logdna/logdna
           alpha-version-ref: dev:${CIRCLE_BRANCH}
+          requires:
+            - orb-tools/pack
+
+  production:
+    jobs:
+      - orb-tools/lint:
+          filters: *tags_only_filter
+
+      - orb-tools/pack:
+          filters: *tags_only_filter
+          requires:
+            - orb-tools/lint
+
+      - orb-tools/publish:
+          context: logdna-default
+          filters: *tags_only_filter
+          orb-ref: logdna/logdna:${CIRCLE_TAG}
           requires:
             - orb-tools/pack
