@@ -41,7 +41,7 @@ jobs:
           command: echo 'export FAILURE=true' >> ${BASH_ENV}
           when: on_fail
       - run:
-          name: Export Failure
+          name: Export Success
           command: echo 'export FAILURE=false' >> ${BASH_ENV}
           when: on_success
       - logdna/report:
@@ -79,6 +79,14 @@ git tag to Github and the workflow to release this version will be started.
 git tag 1.2.3 -m "Release version 1.2.3 of the LogDNA CircleCI Orb"
 git push --tags
 ```
+
+## How to test
+
+Before tagging the tree for release we need to perform some testing. The
+easiest way is to set the version of the Orb in your .circleci/config.yml file
+to the floating tag, i.e. `logdna/logdna@dev:master` for the  master branch, and
+run the job. Then look for any regressions, if not we are good to go and you
+can tag the tree and push to Github.
 
 ## Help / Support
 

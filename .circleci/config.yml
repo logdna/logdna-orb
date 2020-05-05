@@ -22,7 +22,7 @@ tags_only_filters: &tags_only_filter
   tags:
     only: /[0-9]+\.[0-9]+\.[0-9]+/
 workflows:
-  dev:
+  development:
     jobs:
       - orb-tools/lint
 

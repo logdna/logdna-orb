@@ -6,8 +6,8 @@ parameters:
     default: ${LOGDNA_KEY}
   failure:
     description: Whether the Build has Failed
-    type: boolean
-    default: false
+    type: string
+    default: "false"
   hostname:
     description: Custom Hostname
     type: string
