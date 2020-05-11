@@ -30,7 +30,7 @@ steps:
       command: |
         LINE="#${CIRCLE_BUILD_NUM}: ${CIRCLE_JOB} on"
         LEVEL="INFO"
-        if [ -z "${CIRCLE_PULL_REQUEST" ]; then
+        if [ -z "${CIRCLE_PULL_REQUEST}" ]; then
           LINE="${LINE} Pull Request"
           if [ ! -z "${CIRCLE_PR_NUMBER}" ]; then
             LINE="${LINE}(#${CIRCLE_PR_NUMBER})"
