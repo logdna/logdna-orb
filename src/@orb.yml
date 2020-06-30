@@ -1,0 +1,5 @@
+version: 2.1
+description: Send CircleCI Events to LogDNA upon Build
+display:
+  home_url: https://www.logdna.com/
+  source_url: https://github.com/logdna/logdna-orb

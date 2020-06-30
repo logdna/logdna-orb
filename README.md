@@ -32,7 +32,7 @@ jobs:
       - logdna/notify
       # Enable Kubernetes Logging via LogDNA Agent
       - logdna/enablek8slogging
-     
+
      # The Rest of Your Build Steps...
 
      # Report to LogDNA @ the End of the Job via cURL:
@@ -41,12 +41,52 @@ jobs:
           command: echo 'export FAILURE=true' >> ${BASH_ENV}
           when: on_fail
       - run:
-          name: Export Failure
+          name: Export Success
           command: echo 'export FAILURE=false' >> ${BASH_ENV}
           when: on_success
       - logdna/report:
           failure: ${FAILURE}
 ```
+
+## Release Process
+
+To validate any changes to the Orb locally you can use the included
+`validate.sh` shell script in the repository, it will pack the individual
+files together to a proper Orb and then run the validate command
+from the `circleci` cli tool on the result.
+
+```shell
+cat validate.sh
+#!/bin/sh
+
+circleci config pack src | circleci orb validate -
+```
+
+All published branches will trigger publishing under a alpha reference
+under the logdna namespace for the logdna Orb. It can be referenced
+as follows:
+
+```shell
+logdna/logdna@dev:${CIRCLE_BRANCH}
+e.g.
+logdna/logdna@dev:master
+```
+
+To release a properly tagged version of the Orb push a semantic versioned
+git tag to Github and the workflow to release this version will be started.
+
+```shell
+git tag 1.2.3 -m "Release version 1.2.3 of the LogDNA CircleCI Orb"
+git push --tags
+```
+
+## How to test
+
+Before tagging the tree for release we need to perform some testing. The
+easiest way is to set the version of the Orb in your .circleci/config.yml file
+to the floating tag, i.e. `logdna/logdna@dev:master` for the  master branch, and
+run the job. Then look for any regressions, if not we are good to go and you
+can tag the tree and push to Github.
 
 ## Help / Support
 

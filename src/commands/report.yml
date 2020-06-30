@@ -1,0 +1,95 @@
+description: Report the Status of the Build via cURL
+parameters:
+  logdna-key:
+    description: The LogDNA Ingestion Key
+    type: string
+    default: ${LOGDNA_KEY}
+  failure:
+    description: Whether the Build has Failed
+    type: string
+    default: "false"
+  hostname:
+    description: Custom Hostname
+    type: string
+    default: ${CIRCLE_PROJECT_REPONAME}
+  app:
+    description: Custom App Name
+    type: string
+    default: ${CIRCLE_JOB}
+  tags:
+    description: Comma-Separated List of Tags
+    type: string
+    default: circleci
+  baseurl:
+    description: Custom LogDNA Ingestion URL
+    type: string
+    default: https://logs.logdna.com/logs/ingest
+steps:
+  - run:
+      name: Prepare Log Line
+      command: |
+        LOG_LINE="#${CIRCLE_BUILD_NUM}: ${CIRCLE_JOB} on"
+        LOG_LEVEL="INFO"
+        if [ -z "${CIRCLE_PULL_REQUEST}" ]; then
+          LOG_LINE="${LOG_LINE} Pull Request"
+          if [ ! -z "${CIRCLE_PR_NUMBER}" ]; then
+            LOG_LINE="${LOG_LINE}(#${CIRCLE_PR_NUMBER})"
+          fi
+          if [ ! -z "${CIRCLE_PR_REPONAME}" ]; then
+            LOG_LINE="${LOG_LINE} from ${CIRCLE_PR_USERNAME}/${CIRCLE_PR_REPONAME}"
+          fi
+          LOG_LINE="${LOG_LINE} onto ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
+        else
+          LOG_LINE="${LOG_LINE} Branch ${CIRCLE_BRANCH} of ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
+        fi
+        if [ "<< parameters.failure >>" = true ]; then
+          LOG_LINE="${LOG_LINE} has failed!"
+          LOG_LEVEL="ERROR"
+        else
+          LOG_LINE="${LOG_LINE} has succeeded!"
+        fi
+        echo "export LOG_LINE=\"${LOG_LINE}\"" >> ${BASH_ENV}
+        echo "export LOG_LEVEL=${LOG_LEVEL}" >> ${BASH_ENV}
+  - run:
+      name: Ship the Information
+      command: |
+        source ${BASH_ENV}
+        if [ ! -z "<< parameters.logdna-key >>" ]; then
+          echo '{
+            "lines": [
+              {
+                "line": "${LOG_LINE}",
+                "app": "<< parameters.app >>",
+                "tags": "<< parameters.tags >>",
+                "level": "${LOG_LEVEL}",
+                "meta": {
+                  "pr": {
+                    "associated": "${CIRCLE_PULL_REQUEST}",
+                    "number": "${CIRCLE_PR_NUMBER}",
+                    "reponame": "${CIRCLE_PR_REPONAME}",
+                    "username": "${CIRCLE_PR_USERNAME}"
+                  },
+                  "project": {
+                    "branch": "${CIRCLE_BRANCH}",
+                    "reponame": "${CIRCLE_PROJECT_REPONAME}",
+                    "username": "${CIRCLE_PROJECT_USERNAME}"
+                  },
+                  "build": {
+                    "number": "${CIRCLE_BUILD_NUM}",
+                    "url": "${CIRCLE_BUILD_URL}",
+                    "previous": ${CIRCLE_PREVIOUS_BUILD_NUM},
+                    "compare": "${CIRCLE_COMPARE_URL}"
+                  }
+                }
+              }
+            ]
+          }' > payload.json.envsubst
+
+          envsubst < payload.json.envsubst > payload.json
+
+          curl "<< parameters.baseurl >>?hostname=<< parameters.hostname >>&now=$(date +%s)" \
+           -u << parameters.logdna-key >>: \
+           -H "Content-Type: application/json; charset=UTF-8" \
+           -d @payload.json
+          rm -rf payload.json.envsubst payload.json
+        fi
