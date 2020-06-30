@@ -50,7 +50,7 @@ workflows:
 
       - orb-tools/publish:
           context: logdna-default
-          orb-ref: logdna/logdna:${CIRCLE_TAG}
+          orb-ref: logdna/logdna@${CIRCLE_TAG}
           attach-workspace: true
           filters: *tags_only_filter
           requires:
