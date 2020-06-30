@@ -46,37 +46,40 @@ steps:
       name: Ship the Information
       command: |
         if [ ! -z "<< parameters.logdna-key >>" ]; then
-           curl "<< parameters.baseurl >>?hostname=<< parameters.hostname >>&now=$(date +%s)" \
+          echo '{
+            "lines": [
+              {
+                "line":"${LOG_LINE}",
+                "app":"<< parameters.app >>",
+                "tags":"<< parameters.tags >>",
+                "level": "INFO",
+                "meta": {
+                  "pr": {
+                    "associated": "${CIRCLE_PULL_REQUEST}",
+                    "number": ${CIRCLE_PR_NUMBER},
+                    "reponame": "${CIRCLE_PR_REPONAME}",
+                    "username": "${CIRCLE_PR_USERNAME}"
+                  },
+                  "project": {
+                    "branch": "${CIRCLE_BRANCH}",
+                    "reponame": "${CIRCLE_PROJECT_REPONAME}",
+                    "username": "${CIRCLE_PROJECT_USERNAME}"
+                  },
+                  "build": {
+                    "number": ${CIRCLE_BUILD_NUM},
+                    "url": "${CIRCLE_BUILD_URL}",
+                    "previous": ${CIRCLE_PREVIOUS_BUILD_NUM}
+                    "compare": "${CIRCLE_COMPARE_URL}"
+                  }
+                }
+              }
+            ]
+          }' > payload.json.envsubst
+
+          envsubst < payload.json.envsubst > payload.json
+
+          curl "<< parameters.baseurl >>?hostname=<< parameters.hostname >>&now=$(date +%s)" \
            -u << parameters.logdna-key >>: \
            -H "Content-Type: application/json; charset=UTF-8" \
-           -d \
-           '{
-             "lines": [
-               {
-                 "line":"${LOG_LINE}",
-                 "app":"<< parameters.app >>",
-                 "tags":"<< parameters.tags >>",
-                 "level": "INFO",
-                 "meta": {
-                   "pr": {
-                     "associated": "${CIRCLE_PULL_REQUEST}",
-                     "number": ${CIRCLE_PR_NUMBER},
-                     "reponame": "${CIRCLE_PR_REPONAME}",
-                     "username": "${CIRCLE_PR_USERNAME}"
-                   },
-                   "project": {
-                     "branch": "${CIRCLE_BRANCH}",
-                     "reponame": "${CIRCLE_PROJECT_REPONAME}",
-                     "username": "${CIRCLE_PROJECT_USERNAME}"
-                   },
-                   "build": {
-                     "number": ${CIRCLE_BUILD_NUM},
-                     "url": "${CIRCLE_BUILD_URL}",
-                     "previous": ${CIRCLE_PREVIOUS_BUILD_NUM}
-                     "compare": "${CIRCLE_COMPARE_URL}"
-                   }
-                 }
-               }
-             ]
-          }'
+           -d @payload.json
         fi
