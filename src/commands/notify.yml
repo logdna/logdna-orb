@@ -24,39 +24,42 @@ steps:
   - run:
       name: Prepare Log Line
       command: |
-        LINE="#${CIRCLE_BUILD_NUM}: ${CIRCLE_JOB} on"
+        LOG_LINE="#${CIRCLE_BUILD_NUM}: ${CIRCLE_JOB} on"
+        LOG_LEVEL="INFO"
         if [ -z "${CIRCLE_PULL_REQUEST}" ]; then
-          LINE="${LINE} Pull Request"
+          LOG_LINE="${LOG_LINE} Pull Request"
           if [ ! -z "${CIRCLE_PR_NUMBER}" ]; then
-            LINE="${LINE}(#${CIRCLE_PR_NUMBER})"
+            LOG_LINE="${LOG_LINE}(#${CIRCLE_PR_NUMBER})"
           fi
           if [ ! -z "${CIRCLE_PR_REPONAME}" ]; then
-            LINE="${LINE} from ${CIRCLE_PR_USERNAME}/${CIRCLE_PR_REPONAME}"
+            LOG_LINE="${LOG_LINE} from ${CIRCLE_PR_USERNAME}/${CIRCLE_PR_REPONAME}"
           fi
-          LINE="${LINE} onto ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
+          LOG_LINE="${LOG_LINE} onto ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
         else
-          LINE="${LINE} Branch ${CIRCLE_BRANCH} of ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
+          LOG_LINE="${LOG_LINE} Branch ${CIRCLE_BRANCH} of ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
         fi
-        LINE="${LINE} has been triggered"
+        LOG_LINE="${LOG_LINE} has been triggered"
         if [ ! -z "${CIRCLE_USERNAME}" ]; then
-          LINE="${LINE} by @${CIRCLE_USERNAME}"
+          LOG_LINE="${LOG_LINE} by @${CIRCLE_USERNAME}"
         fi
-        echo 'export LOG_LINE="$(echo ${LINE})"' >> ${BASH_ENV}
+        echo "export LOG_LINE=\"${LOG_LINE}\"" >> ${BASH_ENV}
+        echo "export LOG_LEVEL=${LOG_LEVEL}" >> ${BASH_ENV}
   - run:
       name: Ship the Information
       command: |
+        source ${BASH_ENV}
         if [ ! -z "<< parameters.logdna-key >>" ]; then
           echo '{
             "lines": [
               {
-                "line":"${LOG_LINE}",
-                "app":"<< parameters.app >>",
-                "tags":"<< parameters.tags >>",
-                "level": "INFO",
+                "line": "${LOG_LINE}",
+                "app": "<< parameters.app >>",
+                "tags": "<< parameters.tags >>",
+                "level": "${LOG_LEVEL}",
                 "meta": {
                   "pr": {
                     "associated": "${CIRCLE_PULL_REQUEST}",
-                    "number": ${CIRCLE_PR_NUMBER},
+                    "number": "${CIRCLE_PR_NUMBER}",
                     "reponame": "${CIRCLE_PR_REPONAME}",
                     "username": "${CIRCLE_PR_USERNAME}"
                   },
@@ -66,9 +69,9 @@ steps:
                     "username": "${CIRCLE_PROJECT_USERNAME}"
                   },
                   "build": {
-                    "number": ${CIRCLE_BUILD_NUM},
+                    "number": "${CIRCLE_BUILD_NUM}",
                     "url": "${CIRCLE_BUILD_URL}",
-                    "previous": ${CIRCLE_PREVIOUS_BUILD_NUM}
+                    "previous": ${CIRCLE_PREVIOUS_BUILD_NUM},
                     "compare": "${CIRCLE_COMPARE_URL}"
                   }
                 }
@@ -82,4 +85,5 @@ steps:
            -u << parameters.logdna-key >>: \
            -H "Content-Type: application/json; charset=UTF-8" \
            -d @payload.json
+          rm -rf payload.json.envsubst payload.json
         fi
