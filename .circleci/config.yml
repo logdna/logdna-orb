@@ -34,6 +34,7 @@ workflows:
           context: logdna-default
           orb-name: logdna/logdna
           alpha-version-ref: dev:${CIRCLE_BRANCH}
+          publish-token-variable: CIRCLE_TOKEN_FOR_LOGDNA
           attach-workspace: true
           requires:
             - orb-tools/pack
@@ -51,6 +52,7 @@ workflows:
       - orb-tools/publish:
           context: logdna-default
           orb-ref: logdna/logdna@${CIRCLE_TAG}
+          publish-token-variable: CIRCLE_TOKEN_FOR_LOGDNA
           attach-workspace: true
           filters: *tags_only_filter
           requires:
