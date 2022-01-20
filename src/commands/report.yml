@@ -2,8 +2,8 @@ description: Report the Status of the Build via cURL
 parameters:
   logdna-key:
     description: The LogDNA Ingestion Key
-    type: string
-    default: ${LOGDNA_KEY}
+    type: env_var_name
+    default: LOGDNA_KEY
   failure:
     description: Whether the Build has Failed
     type: string
