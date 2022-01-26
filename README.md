@@ -1,5 +1,7 @@
 # LogDNA Orb
-A [CircleCI Orb](https://circleci.com/docs/2.0/orb-intro/) containing tools for integrating LogDNA reporting into CircleCI. 
+LogDNA is a highly scalable log management solution that indexes, aggregates, and analyzes log data.
+The [CircleCI Orb](https://circleci.com/docs/2.0/orb-intro/) plugin enables CircleCI logs to be sent directly to LogDNA.
+Learn more about LogDNA: [logdna.com](https://www.logdna.com/)
 
 ## Requirements
 * A LogDNA account. Create a LogDNA account [here](https://logdna.com/sign-up/)
