@@ -2,8 +2,8 @@ description: Notify LogDNA of the Build Event via cURL
 parameters:
   logdna-key:
     description: The LogDNA Ingestion Key
-    type: string
-    default: ${LOGDNA_KEY}
+    type: env_var_name
+    default: LOGDNA_KEY
   hostname:
     description: Custom Hostname
     type: string

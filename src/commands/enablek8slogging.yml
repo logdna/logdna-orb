@@ -2,8 +2,8 @@ description: Enable Kubernetes Logging via LogDNA Agent
 parameters:
   logdna-key:
     description: The LogDNA Ingestion Key
-    type: string
-    default: ${LOGDNA_KEY}
+    type: env_var_name
+    default: LOGDNA_KEY
 steps:
   - run:
       name: Enable LogDNA Agent for K8S
