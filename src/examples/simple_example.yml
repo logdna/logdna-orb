@@ -1,0 +1,31 @@
+description: >
+  A very simple example of a CircleCI Config using LogDNA Orb.
+usage:
+  version: 2.1
+  orbs:
+      logdna: logdna/logdna@0.0.1
+  jobs:
+    build:
+      machine: true
+      environment:
+        LOGDNA_KEY: Your LogDNA Ingestion Key Here
+      steps:
+        - checkout
+        # Notify LogDNA @ the Start of the Job via cURL:
+        - logdna/notify
+        # Enable Kubernetes Logging via LogDNA Agent
+        - logdna/enablek8slogging
+
+       # The Rest of Your Build Steps...
+
+       # Report to LogDNA @ the End of the Job via cURL:
+        - run:
+            name: Export Failure
+            command: echo 'export FAILURE=true' >> ${BASH_ENV}
+            when: on_fail
+        - run:
+            name: Export Success
+            command: echo 'export FAILURE=false' >> ${BASH_ENV}
+            when: on_success
+        - logdna/report:
+            failure: ${FAILURE}
